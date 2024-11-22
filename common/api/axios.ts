@@ -2,16 +2,13 @@ import axios from "axios";
 
 // 创建 Axios 实例
 const axiosInstance = axios.create({
-    // baseURL: "https://49.232.186.238:4321", // 基础地址
-    baseURL: "https://localhost:4321", // 基础地址
+    // baseURL: "https://49.232.186.238:5521", // 基础地址
+    baseURL: "https://localhost:5521", // 基础地址
     timeout: 50000, // 请求超时时间
     validateStatus: function (status) {
         return status >= 200 && status < 300 || status === 401; // 允许 401
     }
 });
-
-
-
 
 import { defaultResponseInterceptors, tokenRequestInterceptor, tokenResponseInterceptor } from "./interception";
 

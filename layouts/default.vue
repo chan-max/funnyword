@@ -306,6 +306,7 @@ html,
 body,
 #__nuxt {
   height: 100%;
+  background-color: #080808;
 }
 .user-avatar img {
   height: 100%;
