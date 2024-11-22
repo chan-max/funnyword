@@ -1,9 +1,9 @@
 import { ref } from "vue";
 
-export const useGamePagination = (fetchApi: any, preprocessParams?: any) => {
+export const usePagination = (fetchApi: any, preprocessParams?: any) => {
     // 数据状态
     const list = ref([]); // 所有游戏数据
-    const page = ref(1); // 当前页码
+    const currentPage = ref(1); // 当前页码
     const pageSize = ref(12); // 每页大小
     const total = ref(0); // 数据总量
 
@@ -18,22 +18,25 @@ export const useGamePagination = (fetchApi: any, preprocessParams?: any) => {
         if (loading.value || isLastPage.value) return; // 防止重复加载
         loading.value = true;
 
+
+
         try {
             // 调用参数预处理钩子，动态生成请求参数
             const params = preprocessParams
-                ? preprocessParams({ page: page.value, pageSize: pageSize.value })
-                : { page: page.value, pageSize: pageSize.value };
+                ? preprocessParams({ currentPage: currentPage.value, pageSize: pageSize.value })
+                : { currentPage: currentPage.value, pageSize: pageSize.value };
 
             const { data } = await fetchApi(params);
-            const response = data.value;
+            const response = toRaw(data);
 
-            const { games, total: newTotal } = response;
+
+            const { list:list2, total: newTotal } = response;
 
             // 更新数据状态
-            if (games && games.length > 0) {
-                list.value = [...list.value, ...games];
+            if (list2 && list2.length > 0) {
+                list.value = [...list.value, ...list2];
                 total.value = newTotal;
-                page.value += 1;
+                currentPage.value += 1;
             }
 
             // 更新状态管理
@@ -50,7 +53,7 @@ export const useGamePagination = (fetchApi: any, preprocessParams?: any) => {
     // 重置分页（用于重新加载）
     const resetPagination = () => {
         list.value = [];
-        page.value = 1;
+        currentPage.value = 1;
         total.value = 0;
         isEmpty.value = false;
         isLastPage.value = false;

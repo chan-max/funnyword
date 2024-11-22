@@ -1,5 +1,7 @@
 <template>
-  <div class="flex flex-col items-center space-y-10 py-10 bg-transparent relative">
+  <div
+    class="flex flex-col items-center justify-center space-y-10 py-10 bg-transparent relative h-full"
+  >
     <!-- 右上角下拉菜单 -->
     <div class="absolute top-4 right-4 flex space-x-4">
       <UDropdown :items="[keyboardOptions]" :popper="{ placement: 'bottom-start' }">
@@ -66,8 +68,10 @@
       </span>
     </div>
 
-    <div v-if="message" :class="messageClass" class="text-xl font-semibold mt-6">
-      {{ message }}
+    <div style="height: 120px">
+      <div v-if="message" :class="messageClass" class="text-xl font-semibold mt-6">
+        {{ message }}
+      </div>
     </div>
   </div>
 </template>
@@ -81,6 +85,9 @@ const props = defineProps({
     default: "hello",
   },
 }); // 单词
+
+const emits = defineEmits(["error", "success", "init"]);
+
 const currentIndex = ref(0); // 当前输入字符的索引
 const message = ref("");
 const messageClass = ref("");
@@ -180,6 +187,7 @@ function handleKeyDown(event) {
       messageClass.value = "text-green-400";
       playSound(successSound.value);
       isComplete.value = true;
+      emits("success");
     }
   } else {
     isShaking.value = true;
@@ -189,6 +197,7 @@ function handleKeyDown(event) {
     setTimeout(() => {
       isShaking.value = false;
     }, 500);
+    emits("error");
   }
 }
 
@@ -200,6 +209,13 @@ function resetInput() {
   isShaking.value = false;
   isComplete.value = false;
 }
+
+watch(
+  () => props.targetWord,
+  () => {
+    resetInput();
+  }
+);
 
 window.addEventListener("keydown", handleKeyDown);
 

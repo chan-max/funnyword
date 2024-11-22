@@ -1,9 +1,12 @@
 <template>
   <AConfigProvider :locale="locale == 'zh' ? zhCN : null">
-    <div class="flex flex-col w-full h-full" style="background: #080808">
+    <div class="flex flex-col w-full" style="background: #080808">
       <!-- Header -->
-      <header class="text-white py-4 shadow-md">
-        <div class="container mx-auto flex justify-between items-center px-4">
+      <header class="text-white shadow-md">
+        <div
+          style="height: var(--header-height)"
+          class="mx-auto flex justify-between items-center px-8"
+        >
           <!-- Logo -->
           <NuxtLink to="/">
             <img
@@ -110,7 +113,7 @@
         </div>
       </header>
 
-      <div style="flex: 1">
+      <div style="min-height: 80vh">
         <slot></slot>
       </div>
 
@@ -153,7 +156,9 @@
 
           <!-- Action Buttons -->
           <div class="flex justify-end space-x-4">
-            <UButton  class="text-custom-500" @click="goSignup" variant="link"> Sign up </UButton>
+            <UButton class="text-custom-500" @click="goSignup" variant="link">
+              Sign up
+            </UButton>
 
             <div style="flex: 1"></div>
 
@@ -174,8 +179,6 @@
           </div>
         </div>
       </UModal>
-
-      <Footer></Footer>
     </div>
   </AConfigProvider>
 </template>
@@ -310,5 +313,24 @@ body,
 }
 .user-avatar img {
   height: 100%;
+}
+
+.hide-scrollbar {
+  /* 对于 WebKit 和 Blink 浏览器（Chrome, Safari, Edge） */
+  overflow: -moz-scrollbars-none;
+  /* Firefox */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer 和 Edge */
+
+  /* 隐藏 WebKit 和 Blink 浏览器的滚动条 */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+:root {
+  --header-height: 84px;
 }
 </style>

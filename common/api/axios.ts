@@ -55,6 +55,13 @@ export const getUserInfo = () => new Promise(async (resolve, reject) => {
 })
 
 
+
+export const getEnWordList = (params) => new Promise(async (resolve, reject) => {
+    let res = await api.post('/api/en-words/page', params)
+    resolve(res.data)
+})
+
+
 export default {
     login, logout, getUserInfo, signup, updateUserInfo
 };
