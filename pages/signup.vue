@@ -1,16 +1,14 @@
 <template>
   <div class="p-8 max-w-lg mx-auto">
-    <h1 class="text-2xl font-bold mb-6 text-center">User Registration</h1>
+    <h1 class="text-2xl font-bold mb-6 text-center">注册一个账号</h1>
     <form @submit.prevent="handleSubmit">
       <!-- Username -->
       <div class="mb-6">
-        <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
-          Username
-        </label>
+        <label for="username" class="block text-sm font-medium mb-2"> 账号 </label>
         <UInput
           id="username"
           v-model="form.username"
-          placeholder="Enter your username"
+          placeholder="输入账号"
           :maxLength="15"
           :minLength="5"
           required
@@ -21,14 +19,12 @@
 
       <!-- Password -->
       <div class="mb-6">
-        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-          Password
-        </label>
+        <label for="password" class="block text-sm font-medium mb-2"> 密码 </label>
         <UInput
           id="password"
           v-model="form.password"
           type="password"
-          placeholder="Enter your password"
+          placeholder="输入密码"
           :maxLength="15"
           :minLength="5"
           required
@@ -39,14 +35,14 @@
 
       <!-- Confirm Password -->
       <div class="mb-6">
-        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
-          Confirm Password
+        <label for="confirmPassword" class="block text-sm font-medium mb-2">
+          确认密码
         </label>
         <UInput
           id="confirmPassword"
           v-model="form.confirmPassword"
           type="password"
-          placeholder="Confirm your password"
+          placeholder="确认密码"
           required
           class="w-full"
         />
@@ -59,9 +55,9 @@
       <div class="flex justify-center">
         <UButton
           type="submit"
-          class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+          class="bg-custom-500 text-white px-6 py-2 rounded-lg hover:bg-custom-600 w-full"
         >
-          Register
+          <div class="w-full text-center">注册</div>
         </UButton>
       </div>
     </form>

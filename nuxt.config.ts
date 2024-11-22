@@ -25,12 +25,8 @@ export default defineNuxtConfig({
       },
       link: [
         { rel: 'icon', type: 'image/x-icon', href: config.favicon },
-        { rel: 'preconnect', href: 'https://securepubads.g.doubleclick.net' },
-        { rel: 'dns-prefetch', href: 'https://securepubads.g.doubleclick.net' },
-        { rel: 'preload', href: 'https://www.googletagservices.com/tag/js/gpt.js', as: 'script' }
       ],
       script: [
-        { src: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js', async: false, defer: false },
       ]
     }
   },

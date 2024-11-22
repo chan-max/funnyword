@@ -1,24 +1,26 @@
 <template>
-  <div class="relative h-full">
+  <div class="h-full w-full flex flex-col justify-center items-center">
     <!-- 上方文字打字效果 -->
-    <WordTyper :targetWord="targetWord" @success="typeSuccess"></WordTyper>
+    <WordTyper :targetWord="targetWord?.word" @success="typeSuccess"></WordTyper>
 
-    <!-- 左侧列表 -->
+    <div style="width: 60vw" class="text-center" > 翻译： {{ targetWord.translation }}</div>
+  </div>
+
+  <!-- 左侧列表 -->
+  <div
+    class="fixed flex flex-col"
+    style="height: calc(100vh - var(--header-height)); top: var(--header-height); left: 0"
+  >
+    <div class="p-8">总单词数量 : {{ total }}</div>
     <div
-      class="absolute hide-scrollbar gradient-both"
-      style="
-        height: calc(80vh - var(--header-height));
-        top: 10vh;
-        left: 0;
-        overflow: auto;
-        padding: 50px;
-      "
       ref="listContainer"
       @scroll="handleScroll"
+      style="flex: 1; overflow: auto"
+      class="gradient-both hide-scrollbar"
     >
       <div
-        class="text-white opacity-60 cursor-pointer hover:opacity-100 m-4 transition"
-        :class="{ active: targetWord === item.word }"
+        class="opacity-60 cursor-pointer hover:opacity-100 mx-10 my-4 transition"
+        :class="{ active: targetWord?.word === item.word }"
         v-for="(item, index) in list"
         :key="item.word"
         ref="listItems"
@@ -26,8 +28,6 @@
       >
         {{ item.word }}
       </div>
-      <!-- 底部加载提示 -->
-      <div v-if="loading" class="text-center text-white py-4">加载中...</div>
     </div>
   </div>
 </template>
@@ -47,24 +47,68 @@ const listContainer = ref(null); // 列表容器
 const listItems = ref([]); // 列表项引用
 
 // 使用分页钩子
-const { list, getList, loading } = usePagination(getEnWordList, (params) => {
-  params.pageSize = 100;
-  return params;
+const { list, getList, loading, getPreList, total } = usePagination(getEnWordList, {
+  preprocessParams: (params) => {
+    params.pageSize = 100;
+    return params;
+  },
+  defaultCurrentPage: 1,
 });
 
-// 滚动处理逻辑
-const handleScroll = (event) => {
-  const container = event.target;
-  if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50) {
-    if (!loading.value) {
-      getList();
+function getTopVisibleElement(container) {
+  if (!container) return null;
+
+  // 获取容器的所有子元素
+  const elements = container.children;
+
+  // 获取容器的可视区域
+  const containerRect = container.getBoundingClientRect();
+
+  // 遍历子元素，找出视图中最顶部的元素
+  for (const element of elements) {
+    const rect = element.getBoundingClientRect();
+
+    // 检查元素是否完全或部分出现在容器的可视区域中
+    if (rect.bottom > containerRect.top && rect.top < containerRect.bottom) {
+      return element;
     }
+  }
+
+  return null; // 没有可见的元素
+}
+
+// 滚动处理逻辑
+const handleScroll = async (event) => {
+  console.log("handleScroll");
+
+  const container = event.target;
+
+  // 检查是否向上滚动触顶，触发获取上一页数据
+  if (container.scrollTop <= 50 && !loading.value) {
+    let currentViewTopEl = getTopVisibleElement(listContainer.value);
+
+    await getPreList();
+
+    nextTick(() => {
+      currentViewTopEl.scrollIntoView({
+        behavior: "auto",
+        block: "start",
+      });
+    });
+  }
+
+  // 检查是否接近底部，触发获取下一页数据
+  if (
+    container.scrollTop + container.clientHeight >= container.scrollHeight - 50 &&
+    !loading.value
+  ) {
+    getList();
   }
 };
 
 // 处理点击事件
 function wordClick(item, index) {
-  targetWord.value = item.word;
+  targetWord.value = item;
   targetWordLibIndex.value = index;
   scrollToActive();
 }
@@ -95,8 +139,15 @@ async function init() {
   await getList();
   console.log("词库加载成功");
 
-  targetWord.value = list.value[0]?.word;
+  targetWord.value = list.value[0];
   targetWordLibIndex.value = 0;
+
+  setTimeout(() => {
+    const container = listContainer.value;
+    if (container) {
+      container.scrollTop = 10; // 向下滚动 10px
+    }
+  }, 33);
 }
 
 // 输入完成时，自动跳转到下一个单词
@@ -104,7 +155,7 @@ async function typeSuccess() {
   setTimeout(() => {
     if (targetWordLibIndex.value < list.value.length - 1) {
       targetWordLibIndex.value++;
-      targetWord.value = list.value[targetWordLibIndex.value]?.word;
+      targetWord.value = list.value[targetWordLibIndex.value];
       scrollToActive();
     }
   }, 1000);

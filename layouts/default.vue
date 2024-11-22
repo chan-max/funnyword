@@ -1,6 +1,6 @@
 <template>
   <AConfigProvider :locale="locale == 'zh' ? zhCN : null">
-    <div class="flex flex-col w-full" style="background: #080808">
+    <div class="flex flex-col w-full text-white" style="background: #080808">
       <!-- Header -->
       <header class="text-white shadow-md">
         <div
@@ -19,7 +19,7 @@
           <!-- Navigation -->
           <div class="flex items-center space-x-4">
             <!-- Tabs for PC -->
-            <nav class="hidden md:flex space-x-6">
+            <nav class="flex space-x-6">
               <button
                 v-for="(tab, index) in tabs"
                 :key="index"
@@ -33,36 +33,6 @@
                 {{ tab.label }}
               </button>
             </nav>
-
-            <!-- Dropdown for Mobile -->
-            <div class="relative md:hidden">
-              <button
-                class="p-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition"
-                @click="toggleTabsMenu"
-              >
-                ☰
-              </button>
-
-              <div
-                v-if="showTabsMenu"
-                class="absolute top-full mt-2 left-0 w-48 bg-white text-gray-700 shadow-lg rounded-lg z-50"
-              >
-                <ul class="flex flex-col">
-                  <li
-                    v-for="(tab, index) in tabs"
-                    :key="index"
-                    class="hover:bg-gray-200 transition"
-                  >
-                    <button
-                      @click="navigateTab(index, tab)"
-                      class="block w-full text-left px-4 py-2 text-sm"
-                    >
-                      {{ tab.label }}
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
 
             <!-- <UDropdown :items="[langOptions]" :popper="{ placement: 'bottom-end' }">
               <div class="flex items-center mx-2">
@@ -103,9 +73,9 @@
               <template v-else>
                 <button
                   class="bg-custom-500 hover:bg-custom-600 text-white px-4 py-2 rounded transition"
-                  @click="showLoginModal = true"
+                  @click="openLogin"
                 >
-                  Login
+                  登录
                 </button>
               </template>
             </div>
@@ -117,64 +87,74 @@
         <slot></slot>
       </div>
 
-      <!-- Login Modal -->
-      <UModal v-model="showLoginModal" title="User Login" :closable="true">
-        <div class="p-6 space-y-6">
+      <UModal
+        v-model="showLoginModal"
+        title="User Login"
+        :closable="true"
+        class="dark-modal"
+      >
+        <div class="p-6 space-y-6 bg-gray-800 rounded-md">
           <!-- Login Title -->
-          <h2 class="text-lg font-bold text-gray-700">Login to Your Account</h2>
+          <h2 class="text-lg font-bold text-gray-200">登录</h2>
 
           <!-- Username Input -->
           <div>
-            <label for="username" class="block text-sm font-medium text-gray-600 pb-2">
-              Username
+            <label for="username" class="block text-sm font-medium text-gray-400 pb-2">
+              账号
             </label>
             <UInput
               id="username"
               v-model="username"
-              placeholder="Enter your username"
+              placeholder="输入账号"
               :maxLength="15"
               :minLength="5"
               required
+              class="dark-input"
             />
           </div>
 
           <!-- Password Input -->
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-600 pb-2">
-              Password
+            <label for="password" class="block text-sm font-medium text-gray-400 pb-2">
+              密码
             </label>
             <UInput
               id="password"
               v-model="password"
-              placeholder="Enter your password"
+              placeholder="输入密码"
               type="password"
               :maxLength="15"
               :minLength="5"
               required
+              class="dark-input"
             />
           </div>
 
           <!-- Action Buttons -->
           <div class="flex justify-end space-x-4">
-            <UButton class="text-custom-500" @click="goSignup" variant="link">
-              Sign up
+            <UButton
+              class="text-custom-400 hover:underline"
+              @click="goSignup"
+              variant="link"
+            >
+              注册
             </UButton>
 
             <div style="flex: 1"></div>
 
             <UButton
-              class="px-6 text-custom-500"
+              class="px-6 text-gray-400 hover:text-white"
               @click="showLoginModal = false"
               variant="link"
             >
-              Cancel
+              取消
             </UButton>
             <UButton
-              class="px-6 bg-custom-500"
+              class="px-6 bg-custom-500 hover:bg-custom-600 text-white"
               @click="handleLogin"
               :loading="loginLoading"
             >
-              Login
+              登录
             </UButton>
           </div>
         </div>
@@ -217,14 +197,14 @@ const loginStore = useLoginStatusStore();
 const items = [
   [
     {
-      label: "Info",
+      label: "我的信息",
       icon: "i-heroicons-information-circle",
       onclick: async () => {
         router.push({ path: "/userInfo" });
       },
     },
     {
-      label: "Logout",
+      label: "退出",
       icon: "i-heroicons-arrow-right-start-on-rectangle",
       onclick: async () => {
         doLogout();
@@ -251,6 +231,12 @@ const navigateTab = (index, tab) => {
 };
 
 // Handle login
+
+function openLogin() {
+  // 确保输入组件为失焦状态
+  window.isTypingFocused.value = false;
+  showLoginModal.value = true;
+}
 
 const loginLoading = ref(false);
 
@@ -333,4 +319,15 @@ body,
 :root {
   --header-height: 84px;
 }
+</style>
+
+<style scoped>
+.dark-modal {
+  background-color: #1f2937; /* 深灰色背景 */
+  color: #e5e7eb; /* 浅灰文字 */
+  border: 1px solid #374151; /* 深色边框 */
+  border-radius: 8px;
+}
+
+/* Input Style */
 </style>

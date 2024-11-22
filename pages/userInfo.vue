@@ -59,7 +59,7 @@
         <UButton
           :loading="loading"
           type="submit"
-          class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+          class="bg-custom-500 text-white px-6 py-2 rounded-lg hover:bg-custom-600"
         >
           Save Changes
         </UButton>

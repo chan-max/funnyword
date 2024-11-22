@@ -1,9 +1,10 @@
 <template>
   <div
-    class="flex flex-col items-center justify-center space-y-10 py-10 bg-transparent relative h-full"
+    ref="containerRef"
+    class="flex w-full h-full flex-col items-center justify-center space-y-10 py-10 bg-transparent relative"
   >
     <!-- 右上角下拉菜单 -->
-    <div class="absolute top-4 right-4 flex space-x-4">
+    <div class="absolute top-4 right-8 flex space-x-4">
       <UDropdown :items="[keyboardOptions]" :popper="{ placement: 'bottom-start' }">
         <UButton
           color="white"
@@ -45,7 +46,7 @@
     </div>
 
     <!-- 页面主内容 -->
-    <div class="flex space-x-4">
+    <div class="flex space-x-4 relative" :class="{ bounce: isBouncing }">
       <!-- Display each character -->
       <span
         v-for="(char, index) in targetWord"
@@ -54,22 +55,31 @@
         :class="{
           'text-green-400 font-extrabold scale-110': index < currentIndex,
           'text-gray-500': index > currentIndex,
-          'text-blue-400': index === currentIndex,
+          'text-custom-400': index === currentIndex,
           shake: index === currentIndex && isShaking,
         }"
         style="font-size: 80px"
       >
         {{ char }}
+
+        <!-- 手指提示 -->
+        <span
+          v-if="index === currentIndex && currentFinger"
+          class="absolute text-xs bg-gray-800 text-white rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 text-nowrap"
+        >
+          {{ currentFinger }}
+        </span>
+
         <!-- 下划线 -->
         <div
           v-if="index === currentIndex"
-          class="absolute -bottom-2 left-0 w-full h-1 bg-blue-400"
+          class="absolute -bottom-2 left-0 w-full h-1 bg-custom-400"
         ></div>
       </span>
     </div>
 
-    <div style="height: 120px">
-      <div v-if="message" :class="messageClass" class="text-xl font-semibold mt-6">
+    <div style="height: 64px">
+      <div v-if="message" :class="messageClass" class="text-xl font-semibold">
         {{ message }}
       </div>
     </div>
@@ -78,7 +88,7 @@
 
 <script setup>
 import { useLocalStorage } from "@vueuse/core";
-import { ref, onUnmounted } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
 
 const props = defineProps({
   targetWord: {
@@ -93,6 +103,60 @@ const message = ref("");
 const messageClass = ref("");
 const isShaking = ref(false); // 控制抖动效果
 const isComplete = ref(false); // 是否已完成输入
+const isTypingFocused = ref(true); // 页面是否处于激活状态
+const isBouncing = ref(false); // 跳动动画的控制
+
+// 当前字母的手指提示
+const currentFinger = ref("");
+
+// 手指与按键的映射
+const fingerMapping = {
+  左小拇指: ["Q", "A", "Z", "1", "Tab", "CapsLock", "Shift"],
+  左无名指: ["W", "S", "X", "2"],
+  左中指: ["E", "D", "C", "3"],
+  左食指: ["R", "T", "F", "G", "V", "B", "4", "5"],
+  右食指: ["Y", "U", "H", "J", "N", "M", "6", "7"],
+  右中指: ["I", "K", ",", "8"],
+  右无名指: ["O", "L", ".", "9"],
+  右小拇指: [
+    "P",
+    ";",
+    "/",
+    "[",
+    "]",
+    "'",
+    "Enter",
+    "Backspace",
+    "Shift",
+    "0",
+    "-",
+    "=",
+    "\\",
+  ],
+};
+
+// 获取字母需要用哪个手指输入
+function getFingerForKey(key) {
+  for (const finger in fingerMapping) {
+    if (fingerMapping[finger].includes(key.toUpperCase())) {
+      return finger;
+    }
+  }
+  return null;
+}
+
+// 在即将输入的字母发生变化时更新手指提示
+watch(
+  () => props.targetWord[currentIndex.value],
+  (newChar) => {
+    if (currentIndex.value < props.targetWord.length) {
+      currentFinger.value = getFingerForKey(newChar);
+    } else {
+      currentFinger.value = null; // 清除提示
+    }
+  },
+  { immediate: true }
+);
 
 // 默认音效文件
 const keyboardSound = useLocalStorage("keyboard_sound", "/audio/click1.mp3");
@@ -122,33 +186,17 @@ const errorOptions = ref([
   { label: "Error 3", value: "/audio/error3.mp3" },
 ]);
 
-// 设置音效函数
-function setKeyboardSound(value) {
-  keyboardSound.value = value;
-}
-
-function setSuccessSound(value) {
-  successSound.value = value;
-}
-
-function setErrorSound(value) {
-  errorSound.value = value;
-}
-
 // 播放音效函数
-function playSound(src) {
+function playSound(src, startTime = 0) {
   const audio = new Audio(src);
+  audio.currentTime = startTime;
   audio.play();
-}
-
-// 检查是否为字母或数字
-function isLetterOrDigit(key) {
-  return /^[a-zA-Z0-9]$/.test(key);
 }
 
 // 键盘监听
 function handleKeyDown(event) {
-  // 检查是否按下 "Escape" 键以重置
+  if (!isTypingFocused.value) return;
+
   if (event.key === "Escape") {
     resetInput();
     return;
@@ -167,37 +215,29 @@ function handleKeyDown(event) {
     return;
   }
 
-  if (!isLetterOrDigit(event.key)) {
-    return;
-  }
+  if (/^[a-zA-Z0-9]$/.test(event.key)) {
+    if (event.key === props.targetWord[currentIndex.value]) {
+      playSound(keyboardSound.value);
+      currentIndex.value++;
+      if (currentIndex.value === props.targetWord.length) {
+        message.value = "🎉 太棒了！你正确输入了单词！";
+        messageClass.value = "text-green-400";
+        playSound(successSound.value);
+        isComplete.value = true;
+        isBouncing.value = true; // 启动跳动动画
+        setTimeout(() => (isBouncing.value = false), 1000); // 结束动画
 
-  if (isComplete.value) {
-    return;
-  }
-
-  const currentChar = props.targetWord[currentIndex.value];
-
-  if (event.key === currentChar) {
-    playSound(keyboardSound.value);
-    currentIndex.value++;
-    isShaking.value = false;
-
-    if (currentIndex.value === props.targetWord.length) {
-      message.value = "🎉 太棒了！你正确输入了单词！";
-      messageClass.value = "text-green-400";
-      playSound(successSound.value);
-      isComplete.value = true;
-      emits("success");
+        emits("success");
+      }
+    } else {
+      message.value = "❌ 输入错误，请重试！";
+      messageClass.value = "text-red-400";
+      isShaking.value = true;
+      setTimeout(() => {
+        isShaking.value = false;
+      }, 300);
+      playSound(errorSound.value);
     }
-  } else {
-    isShaking.value = true;
-    message.value = "❌ 输入错误，请重试！";
-    messageClass.value = "text-red-400";
-    playSound(errorSound.value);
-    setTimeout(() => {
-      isShaking.value = false;
-    }, 500);
-    emits("error");
   }
 }
 
@@ -205,24 +245,29 @@ function handleKeyDown(event) {
 function resetInput() {
   currentIndex.value = 0;
   message.value = "输入已重置！";
-  messageClass.value = "text-blue-400";
+  messageClass.value = "text-custom-400";
   isShaking.value = false;
   isComplete.value = false;
 }
 
+// 初始化和销毁事件监听
+onMounted(() => {
+  window.addEventListener("keydown", handleKeyDown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleKeyDown);
+});
+
+// 监听单词变化时重置输入状态
 watch(
   () => props.targetWord,
   () => {
     resetInput();
   }
 );
-
-window.addEventListener("keydown", handleKeyDown);
-
-onUnmounted(() => {
-  window.removeEventListener("keydown", handleKeyDown);
-});
 </script>
+
 <style scoped>
 body {
   font-family: "Arial", sans-serif;
@@ -260,23 +305,17 @@ body {
   }
 }
 
-/* 单词成功动画 */
-.animate-success {
-  animation: success-animation 0.8s ease-in-out;
+.bounce {
+  animation: bounce 1s infinite;
 }
 
-@keyframes success-animation {
-  0% {
-    transform: scale(1);
-    color: #4caf50;
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
   }
   50% {
-    transform: scale(1.5);
-    color: #ffeb3b;
-  }
-  100% {
-    transform: scale(1);
-    color: #4caf50;
+    transform: translateY(-10px);
   }
 }
 </style>
