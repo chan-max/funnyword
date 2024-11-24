@@ -215,6 +215,10 @@ function handleKeyDown(event) {
     return;
   }
 
+  if (isComplete.value) {
+    return;
+  }
+
   if (/^[a-zA-Z0-9]$/.test(event.key)) {
     if (event.key === props.targetWord[currentIndex.value]) {
       playSound(keyboardSound.value);

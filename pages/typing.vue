@@ -1,9 +1,8 @@
 <template>
   <div class="h-full w-full flex flex-col justify-center items-center">
     <!-- 上方文字打字效果 -->
-    <WordTyper :targetWord="targetWord?.word" @success="typeSuccess"></WordTyper>
-
-    <div style="width: 60vw" class="text-center" > 翻译： {{ targetWord.translation }}</div>
+    <WordTyper :targetWord="targetWord?.headWord" @success="typeSuccess"></WordTyper>
+    <WordCard :targetWord="targetWord"></WordCard>
   </div>
 
   <!-- 左侧列表 -->
@@ -20,13 +19,13 @@
     >
       <div
         class="opacity-60 cursor-pointer hover:opacity-100 mx-10 my-4 transition"
-        :class="{ active: targetWord?.word === item.word }"
+        :class="{ active: targetWord?.headWord === item.headWord }"
         v-for="(item, index) in list"
-        :key="item.word"
+        :key="item.headWord"
         ref="listItems"
         @click="wordClick(item, index)"
       >
-        {{ item.word }}
+        {{ item.headWord }}
       </div>
     </div>
   </div>
@@ -37,6 +36,7 @@ import { useRoute } from "vue-router";
 import { getEnWordList } from "@/common/api/axios";
 import { usePagination } from "@/common/paging";
 import { ref, nextTick } from "vue";
+import { getLocalWords } from "~/common/api/word";
 
 const route = useRoute();
 
@@ -47,9 +47,10 @@ const listContainer = ref(null); // 列表容器
 const listItems = ref([]); // 列表项引用
 
 // 使用分页钩子
-const { list, getList, loading, getPreList, total } = usePagination(getEnWordList, {
+const { list, getList, loading, getPreList, total } = usePagination(getLocalWords, {
   preprocessParams: (params) => {
-    params.pageSize = 100;
+    params.lib = route.query.lib;
+    params.pageSize = 200;
     return params;
   },
   defaultCurrentPage: 1,
@@ -137,9 +138,11 @@ function scrollToActive() {
 // 初始化数据
 async function init() {
   await getList();
-  console.log("词库加载成功");
 
   targetWord.value = list.value[0];
+
+  console.log(targetWord.value);
+
   targetWordLibIndex.value = 0;
 
   setTimeout(() => {

@@ -62,6 +62,11 @@ export const getEnWordList = (params) => new Promise(async (resolve, reject) => 
 })
 
 
+
+
+
 export default {
     login, logout, getUserInfo, signup, updateUserInfo
 };
+
+

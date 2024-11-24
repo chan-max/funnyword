@@ -89,6 +89,7 @@
 
       <UModal
         v-model="showLoginModal"
+        :overlay="false"
         title="User Login"
         :closable="true"
         class="dark-modal"
@@ -214,7 +215,7 @@ const items = [
 ];
 
 // Tabs Configuration
-const tabs = [{ label: "词库", path: "/fortune" }];
+const tabs = [{ label: "词库", path: "/lib" }];
 
 // State management
 const showTabsMenu = ref(false); // Mobile tabs dropdown state
@@ -234,7 +235,11 @@ const navigateTab = (index, tab) => {
 
 function openLogin() {
   // 确保输入组件为失焦状态
-  window.isTypingFocused.value = false;
+
+  if (window.isTypingFocused) {
+    window.isTypingFocused.value = false;
+  }
+
   showLoginModal.value = true;
 }
 
