@@ -37,7 +37,7 @@
       <WordCard :targetWord="targetWord"></WordCard>
     </div>
 
-    <div style="width: 240px; height: 100px"></div>
+    <div style="width: 120px; height: 100px"></div>
   </div>
 </template>
 

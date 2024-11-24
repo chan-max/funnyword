@@ -19,7 +19,7 @@
             <!-- Loading Placeholder -->
             <div
               v-show="loadingStates[index]"
-              class="absolute inset-0 flex items-center justify-center bg-gray-700 animate-pulse z-20 px-4 py-8"
+              class="absolute inset-0 flex items-center justify-center bg-gray-700 animate-pulse z-20 px-4 py-16"
             >
               <span class="text-gray-500 text-xs">Loading...</span>
             </div>
