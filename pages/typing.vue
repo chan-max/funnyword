@@ -1,33 +1,43 @@
 <template>
-  <div class="h-full w-full flex flex-col justify-center items-center">
-    <!-- 上方文字打字效果 -->
-    <WordTyper :targetWord="targetWord?.headWord" @success="typeSuccess"></WordTyper>
-    <WordCard :targetWord="targetWord"></WordCard>
-  </div>
-
-  <!-- 左侧列表 -->
-  <div
-    class="fixed flex flex-col"
-    style="height: calc(100vh - var(--header-height)); top: var(--header-height); left: 0"
-  >
-    <div class="p-8">总单词数量 : {{ total }}</div>
-    <div
-      ref="listContainer"
-      @scroll="handleScroll"
-      style="flex: 1; overflow: auto"
-      class="gradient-both hide-scrollbar"
-    >
+  <div class="h-full w-full flex">
+    <div>
       <div
-        class="opacity-60 cursor-pointer hover:opacity-100 mx-10 my-4 transition"
-        :class="{ active: targetWord?.headWord === item.headWord }"
-        v-for="(item, index) in list"
-        :key="item.headWord"
-        ref="listItems"
-        @click="wordClick(item, index)"
+        class="flex flex-col"
+        style="
+          height: calc(100vh - var(--header-height));
+          width: 240px;
+          top: var(--header-height);
+          left: 0;
+        "
       >
-        {{ item.headWord }}
+        <div class="p-8">总单词数量 : {{ total }}</div>
+        <div
+          ref="listContainer"
+          @scroll="handleScroll"
+          style="flex: 1; overflow: auto"
+          class="gradient-both hide-scrollbar py-10"
+        >
+          <div
+            class="opacity-60 cursor-pointer hover:opacity-100 mx-10 my-4 transition"
+            :class="{ active: targetWord?.headWord === item.headWord }"
+            v-for="(item, index) in list"
+            :key="item.headWord"
+            ref="listItems"
+            @click="wordClick(item, index)"
+          >
+            {{ item.headWord }}
+          </div>
+        </div>
       </div>
     </div>
+
+    <div style="flex: 1">
+      <!-- 上方文字打字效果 -->
+      <WordTyper :targetWord="targetWord?.headWord" @success="typeSuccess"></WordTyper>
+      <WordCard :targetWord="targetWord"></WordCard>
+    </div>
+
+    <div style="width: 240px; height: 100px"></div>
   </div>
 </template>
 

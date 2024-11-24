@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gray-900 bg-opacity-90 text-white p-4">
-    <!-- Word Header -->
+  <div class="min-h-screen bg-gray-900 text-white p-8">
+    <!-- 单词标题 -->
     <div v-if="targetWord" class="text-center mb-6">
       <h1 class="text-4xl font-bold">{{ targetWord.headWord }}</h1>
     </div>
@@ -10,35 +10,35 @@
 
     <div
       v-if="targetWord"
-      class="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6"
+      class="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4"
     >
       <!-- Central Content (Pronunciation and Translation) -->
       <div
-        class="bg-gray-800 bg-opacity-75 p-6 rounded-md shadow-md col-span-full lg:col-span-2"
+        class="bg-gray-800 bg-opacity-75 p-4 rounded-md shadow-md col-span-full lg:col-span-2"
       >
         <!-- Pronunciation -->
-        <div class="text-center mb-6">
-          <div class="inline-flex items-center space-x-8">
+        <div class="text-center mb-4">
+          <div class="inline-flex items-center space-x-6">
             <div>
               <p class="text-lg font-semibold">UK:</p>
-              <p class="text-indigo-300">
+              <p class="text-indigo-300 text-xl">
                 / {{ targetWord.content.word.content.ukphone || "-" }} /
               </p>
               <button
                 @click="playVoice('uk')"
-                class="mt-2 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition"
+                class="mt-2 px-3 py-1 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition"
               >
                 ▶ Play UK
               </button>
             </div>
             <div>
               <p class="text-lg font-semibold">US:</p>
-              <p class="text-indigo-300">
+              <p class="text-indigo-300 text-xl">
                 / {{ targetWord.content.word.content.usphone || "-" }} /
               </p>
               <button
                 @click="playVoice('us')"
-                class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+                class="mt-2 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
               >
                 ▶ Play US
               </button>
@@ -49,15 +49,16 @@
         <!-- Translation -->
         <div>
           <h2 class="text-2xl font-semibold text-center mb-4">Translation</h2>
-          <ul class="list-disc pl-10 space-y-2">
+          <ul class="list-disc pl-5 space-y-2">
             <li
               v-for="(translation, index) in targetWord.content.word.content.trans || []"
               :key="index"
-              class="text-sm"
+              class="text-lg leading-relaxed"
             >
-              <span class="font-bold">{{ translation.pos || "N/A" }}</span
-              >: {{ translation.tranCn || "N/A" }}
-              <p v-if="translation.tranOther" class="text-gray-400">
+              <span class="font-bold text-xl">{{ translation.pos || "N/A" }}</span
+              >:
+              {{ translation.tranCn || "N/A" }}
+              <p v-if="translation.tranOther" class="text-gray-400 text-base">
                 {{ translation.tranOther }}
               </p>
             </li>
@@ -66,11 +67,11 @@
       </div>
 
       <!-- Example Sentences -->
-      <div class="bg-gray-800 bg-opacity-75 p-6 rounded-md shadow-md">
-        <h2 class="text-2xl font-semibold mb-4">Example Sentences</h2>
+      <div class="bg-gray-800 bg-opacity-75 p-4 rounded-md shadow-md">
+        <h2 class="text-2xl font-semibold mb-3">Example Sentences</h2>
         <div
           v-if="targetWord.content.word.content.sentence?.sentences?.length"
-          class="space-y-4"
+          class="space-y-3"
         >
           <div
             v-for="(sentence, index) in targetWord.content.word.content.sentence
@@ -78,7 +79,7 @@
             :key="index"
             class="p-3 bg-gray-700 rounded-md"
           >
-            <p>{{ sentence.sContent || "No content available." }}</p>
+            <p class="text-base">{{ sentence.sContent || "No content available." }}</p>
             <p class="text-gray-400 text-sm">{{ sentence.sCn || "" }}</p>
           </div>
         </div>
@@ -88,10 +89,10 @@
       <!-- Synonyms -->
       <div
         v-if="targetWord.content.word.content.syno"
-        class="bg-gray-800 bg-opacity-75 p-6 rounded-md shadow-md"
+        class="bg-gray-800 bg-opacity-75 p-4 rounded-md shadow-md"
       >
-        <h2 class="text-2xl font-semibold mb-4">Synonyms</h2>
-        <ul class="list-disc pl-5 space-y-2 text-sm">
+        <h2 class="text-2xl font-semibold mb-3">Synonyms</h2>
+        <ul class="list-disc pl-4 space-y-2 text-sm">
           <li
             v-for="(synonym, index) in targetWord.content.word.content.syno.synos || []"
             :key="index"
@@ -114,10 +115,10 @@
       <!-- Phrases -->
       <div
         v-if="targetWord.content.word.content.phrase"
-        class="bg-gray-800 bg-opacity-75 p-6 rounded-md shadow-md"
+        class="bg-gray-800 bg-opacity-75 p-4 rounded-md shadow-md"
       >
-        <h2 class="text-2xl font-semibold mb-4">Phrases</h2>
-        <ul class="list-disc pl-5 space-y-2 text-sm">
+        <h2 class="text-2xl font-semibold mb-3">Phrases</h2>
+        <ul class="list-disc pl-4 space-y-2 text-sm">
           <li
             v-for="(phrase, index) in targetWord.content.word.content.phrase.phrases ||
             []"
@@ -132,10 +133,10 @@
       <!-- Related Words -->
       <div
         v-if="targetWord.content.word.content.relWord"
-        class="bg-gray-800 bg-opacity-75 p-6 rounded-md shadow-md"
+        class="bg-gray-800 bg-opacity-75 p-4 rounded-md shadow-md"
       >
-        <h2 class="text-2xl font-semibold mb-4">Related Words</h2>
-        <ul class="list-disc pl-5 space-y-2 text-sm">
+        <h2 class="text-2xl font-semibold mb-3">Related Words</h2>
+        <ul class="list-disc pl-4 space-y-2 text-sm">
           <li
             v-for="(rel, index) in targetWord.content.word.content.relWord.rels || []"
             :key="index"
@@ -184,8 +185,7 @@ const playVoice = (type) => {
 </script>
 
 <style scoped>
-/* Add shadow and spacing */
 .bg-opacity-75 {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 </style>

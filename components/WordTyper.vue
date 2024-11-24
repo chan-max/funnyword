@@ -1,7 +1,7 @@
 <template>
   <div
     ref="containerRef"
-    class="flex w-full h-full flex-col items-center justify-center space-y-10 py-10 bg-transparent relative"
+    class="flex w-full flex-col items-center justify-center space-y-10 pt-10 bg-transparent relative"
   >
     <!-- 右上角下拉菜单 -->
     <div class="absolute top-4 right-8 flex space-x-4">

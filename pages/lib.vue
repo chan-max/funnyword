@@ -81,10 +81,6 @@
 
 <script setup>
 import { books } from "@/common/define/books"; // Example data import
-import { ref } from "vue";
-
-
-
 
 // Loading states for each image
 const loadingStates = ref(Array(books.length).fill(true));
