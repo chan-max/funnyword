@@ -34,10 +34,17 @@
     <div style="flex: 1">
       <!-- 上方文字打字效果 -->
       <WordTyper :targetWord="targetWord?.headWord" @success="typeSuccess"></WordTyper>
-      <WordCard :targetWord="targetWord"></WordCard>
+      <WordCard :targetWord="targetWord" ref="wordCardRef"></WordCard>
     </div>
 
     <div style="width: 120px; height: 100px"></div>
+
+    <div v-if="showModal" class="modal-overlay">
+      <div class="modal-content">
+        <p class="modal-text">欢迎来到 funny word 词库</p>
+        <button @click="handleButtonClick" class="modal-button">开始吧</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -47,6 +54,7 @@ import { getEnWordList } from "@/common/api/axios";
 import { usePagination } from "@/common/paging";
 import { ref, nextTick } from "vue";
 import { getLocalWords } from "~/common/api/word";
+import { typingConfig } from "~/common/config";
 
 const route = useRoute();
 
@@ -55,6 +63,8 @@ const targetWordLibIndex = ref(); // 当前激活的单词索引
 
 const listContainer = ref(null); // 列表容器
 const listItems = ref([]); // 列表项引用
+
+const wordCardRef = ref();
 
 // 使用分页钩子
 const { list, getList, loading, getPreList, total } = usePagination(getLocalWords, {
@@ -90,8 +100,6 @@ function getTopVisibleElement(container) {
 
 // 滚动处理逻辑
 const handleScroll = async (event) => {
-  console.log("handleScroll");
-
   const container = event.target;
 
   // 检查是否向上滚动触顶，触发获取上一页数据
@@ -149,12 +157,9 @@ function scrollToActive() {
 async function init() {
   await getList();
 
-  targetWord.value = list.value[0];
+  showModal.value = true
 
-  console.log(targetWord.value);
-
-  targetWordLibIndex.value = 0;
-
+  // 向下滚动是为了当在中间页初始化时，能强制请求上一页的数据
   setTimeout(() => {
     const container = listContainer.value;
     if (container) {
@@ -165,16 +170,41 @@ async function init() {
 
 // 输入完成时，自动跳转到下一个单词
 async function typeSuccess() {
+  if (!typingConfig.value.autoSwitchToNextAfterSuccess) {
+    return;
+  }
+
+  if (typingConfig.value.playSoundAtTypeSuccess) {
+    wordCardRef.value.playSound();
+  }
+
   setTimeout(() => {
     if (targetWordLibIndex.value < list.value.length - 1) {
       targetWordLibIndex.value++;
       targetWord.value = list.value[targetWordLibIndex.value];
       scrollToActive();
+      window.scrollTo(0, 0);
     }
-  }, 1000);
+  }, 3333);
 }
 
 init();
+
+watch(targetWord, async () => {
+  await nextTick();
+  if (typingConfig.value.playSoundAtBeginning) {
+    wordCardRef.value.playSound();
+  }
+});
+
+const showModal = ref(false);
+
+
+function handleButtonClick() {
+  targetWord.value = list.value[0];
+  targetWordLibIndex.value = 0;
+  showModal.value = false; // 关闭弹窗
+}
 </script>
 
 <style>
@@ -193,5 +223,44 @@ init();
 .active {
   opacity: 1;
   font-weight: bold;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: #1f1f1f;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  color: #fff;
+}
+.modal-text {
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #e0e0e0;
+}
+.modal-button {
+  padding: 10px 20px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s ease;
+}
+.modal-button:hover {
+  background: #0056b3;
 }
 </style>

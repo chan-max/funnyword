@@ -4,45 +4,133 @@
     class="flex w-full flex-col items-center justify-center space-y-10 pt-16 bg-transparent relative"
   >
     <!-- 右上角下拉菜单 -->
-    <div class="absolute top-4 right-8 flex space-x-4">
-      <UDropdown :items="[keyboardOptions]" :popper="{ placement: 'bottom-start' }">
+    <div class="absolute top-4 left-2 flex space-x-4">
+      <UPopover :popper="{ placement: 'top-start' }">
         <UButton
           color="white"
-          :label="getLabelFromOptions(keyboardOptions, keyboardSound)"
+          label="设置"
           trailing-icon="i-heroicons-chevron-down-20-solid"
         />
-        <template #item="{ item }">
-          <div @click="keyboardSound = item.value" class="w-full text-left">
-            {{ item.label }}
-          </div>
-        </template>
-      </UDropdown>
 
-      <UDropdown :items="[successOptions]" :popper="{ placement: 'bottom-start' }">
-        <UButton
-          color="white"
-          :label="getLabelFromOptions(successOptions, successSound)"
-          trailing-icon="i-heroicons-chevron-down-20-solid"
-        />
-        <template #item="{ item }">
-          <div @click="successSound = item.value" class="w-full text-left">
-            {{ item.label }}
-          </div>
-        </template>
-      </UDropdown>
+        <template #panel>
+          <div class="p-4 flex flex-col space-y-4 w-72">
+            <!-- Keyboard Options -->
 
-      <UDropdown :items="[errorOptions]" :popper="{ placement: 'bottom-start' }">
-        <UButton
-          color="white"
-          :label="getLabelFromOptions(errorOptions, errorSound)"
-          trailing-icon="i-heroicons-chevron-down-20-solid"
-        />
-        <template #item="{ item }">
-          <div @click="errorSound = item.value" class="w-full text-left">
-            {{ item.label }}
+            <div class="flex items-center justify-between">
+              <label
+                class="text-right pr-4 text-sm font-medium text-gray-600 text-nowrap"
+              >
+                开始时播放读音
+              </label>
+              <UCheckbox v-model="typingConfig.playSoundAtBeginning" label="" />
+            </div>
+
+
+            <div class="flex items-center justify-between">
+              <label
+                class="text-right pr-4 text-sm font-medium text-gray-600 text-nowrap"
+              >
+                输入成功时播放读音
+              </label>
+              <UCheckbox v-model="typingConfig.playSoundAtTypeSuccess" label="" />
+            </div>
+
+            <div class="flex items-center justify-between">
+              <label
+                class="text-right pr-4 text-sm font-medium text-gray-600 text-nowrap"
+              >
+                输入成功时切换下一个
+              </label>
+              <UCheckbox v-model="typingConfig.autoSwitchToNextAfterSuccess" label="" />
+            </div>
+      
+        
+
+            <div class="flex items-center justify-between">
+              <label
+                class="text-right pr-4 text-sm font-medium text-gray-600 text-nowrap"
+              >
+                键盘音
+              </label>
+              <UDropdown
+                :items="[keyboardOptions]"
+                :popper="{ placement: 'bottom-start' }"
+              >
+                <UButton
+                  color="white"
+                  size="2xs"
+                  :label="getLabelFromOptions(keyboardOptions, keyboardSound)"
+                  trailing-icon="i-heroicons-chevron-down-20-solid"
+                  class="flex-1"
+                />
+                <template #item="{ item }">
+                  <div
+                    @click="keyboardSound = item.value"
+                    class="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 rounded"
+                  >
+                    <span class="flex-1">{{ item.label }}</span>
+                  </div>
+                </template>
+              </UDropdown>
+            </div>
+
+            <!-- Success Options -->
+            <div class="flex items-center justify-between">
+              <label
+                class="text-right pr-4 text-sm font-medium text-gray-600 text-nowrap"
+              >
+                成功音
+              </label>
+              <UDropdown
+                :items="[successOptions]"
+                :popper="{ placement: 'bottom-start' }"
+              >
+                <UButton
+                  color="white"
+                  size="2xs"
+                  :label="getLabelFromOptions(successOptions, successSound)"
+                  trailing-icon="i-heroicons-chevron-down-20-solid"
+                  class="flex-1"
+                />
+                <template #item="{ item }">
+                  <div
+                    @click="successSound = item.value"
+                    class="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 rounded"
+                  >
+                    <span class="flex-1">{{ item.label }}</span>
+                  </div>
+                </template>
+              </UDropdown>
+            </div>
+
+            <!-- Error Options -->
+            <div class="flex items-center justify-between">
+              <label
+                class="text-right pr-4 text-sm font-medium text-gray-600 text-nowrap"
+              >
+                错误音
+              </label>
+              <UDropdown :items="[errorOptions]" :popper="{ placement: 'bottom-start' }">
+                <UButton
+                size="2xs"
+                  color="white"
+                  :label="getLabelFromOptions(errorOptions, errorSound)"
+                  trailing-icon="i-heroicons-chevron-down-20-solid"
+                  class="flex-1"
+                />
+                <template #item="{ item }">
+                  <div
+                    @click="errorSound = item.value"
+                    class="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 rounded"
+                  >
+                    <span class="flex-1">{{ item.label }}</span>
+                  </div>
+                </template>
+              </UDropdown>
+            </div>
           </div>
         </template>
-      </UDropdown>
+      </UPopover>
     </div>
 
     <!-- 页面主内容 -->
@@ -58,7 +146,7 @@
           'text-custom-400': index === currentIndex,
           shake: index === currentIndex && isShaking,
         }"
-        style="font-size: 80px"
+        style="font-size: 80px; min-width: 24px"
       >
         {{ char }}
 
@@ -89,6 +177,8 @@
 <script setup>
 import { useLocalStorage } from "@vueuse/core";
 import { ref, watch, onMounted, onUnmounted } from "vue";
+import { typingConfig } from "~/common/config";
+
 
 const props = defineProps({
   targetWord: {
@@ -104,6 +194,9 @@ const messageClass = ref("");
 const isShaking = ref(false); // 控制抖动效果
 const isComplete = ref(false); // 是否已完成输入
 const isTypingFocused = ref(true); // 页面是否处于激活状态
+
+window.isTypingFocused = isTypingFocused;
+
 const isBouncing = ref(false); // 跳动动画的控制
 
 // 当前字母的手指提示
@@ -137,6 +230,11 @@ const fingerMapping = {
 
 // 获取字母需要用哪个手指输入
 function getFingerForKey(key) {
+  // 空格
+  if (key == " ") {
+    return "左大拇指";
+  }
+
   for (const finger in fingerMapping) {
     if (fingerMapping[finger].includes(key.toUpperCase())) {
       return finger;
@@ -219,7 +317,7 @@ function handleKeyDown(event) {
     return;
   }
 
-  if (/^[a-zA-Z0-9]$/.test(event.key)) {
+  if (/^[a-zA-Z0-9 ]$/.test(event.key)) {
     if (event.key === props.targetWord[currentIndex.value]) {
       playSound(keyboardSound.value);
       currentIndex.value++;

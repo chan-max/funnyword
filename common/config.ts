@@ -1,4 +1,5 @@
-
+import { useLocalStorage } from '@vueuse/core';
+import { ref } from 'vue'
 
 export interface Config {
     tailwindColors: Record<string, Record<string, string>>; // Custom Tailwind color configuration
@@ -11,6 +12,16 @@ export interface Config {
     metaDescription: string; // SEO description for the application
     metaKeywords: string; // SEO keywords for the application
 }
+
+
+
+
+
+export const typingConfig = useLocalStorage('typing_config', {
+    playSoundAtBeginning: false, // 在单词出现时播放读音
+    playSoundAtTypeSuccess: false, // 单词输入成功时播放读音
+    autoSwitchToNextAfterSuccess: false // 单词输入成功时自动切换下一个
+})
 
 
 export function defineConfig(config: Config): Config {

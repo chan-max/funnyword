@@ -25,7 +25,7 @@
                 / {{ targetWord.content.word.content.ukphone || "-" }} /
               </p>
               <button
-                @click="playVoice('uk')"
+                @click="playSound('uk')"
                 class="mt-2 px-3 py-1 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition"
               >
                 ▶ Play UK
@@ -37,7 +37,7 @@
                 / {{ targetWord.content.word.content.usphone || "-" }} /
               </p>
               <button
-                @click="playVoice('us')"
+                @click="playSound('us')"
                 class="mt-2 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
               >
                 ▶ Play US
@@ -173,15 +173,20 @@ const props = defineProps({
   },
 });
 
-const playVoice = (type) => {
+const playSound = (type = "us") => {
   if (!props.targetWord || !props.targetWord.headWord) return;
 
   const audioUrl = `https://dict.youdao.com/dictvoice?audio=${
     props.targetWord.headWord
   }&type=${type === "uk" ? 1 : 2}`;
   const audio = new Audio(audioUrl);
+  audio.muted = false;
   audio.play();
 };
+
+defineExpose({
+  playSound,
+});
 </script>
 
 <style scoped>
