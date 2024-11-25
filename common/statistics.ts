@@ -34,9 +34,6 @@ const statisticsTemplate = {
 
 
     wordRecords: {
-        "abcdefg": {
-            status: WordRecords.NORMAL
-        }
     }
 }
 
@@ -48,9 +45,16 @@ export function createWordRecord() {
 }
 
 
+
+
 export const statistics = useLocalStorage('funnyword_statistics', {
     ...statisticsTemplate
 });
+
+
+export const resetWordRecords = () => {
+    statistics.value.wordRecords = {}
+}
 
 
 export const resetStatistics = () => {

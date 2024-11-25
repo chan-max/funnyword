@@ -66,8 +66,10 @@
         </div>
       </section>
 
-      <div class="p-4 flex">
+      <div class="p-4 flex space-x-4">
         <div style="flex: 1"></div>
+
+        <UButton color="orange" @click="resetWordRecords"> 清空单词标记 </UButton>
         <UButton color="red" @click="resetStatistics">清空记录</UButton>
       </div>
     </div>
@@ -75,7 +77,7 @@
 </template>
 
 <script setup>
-import { statistics, resetStatistics } from "@/common/statistics"; // 替换为你的文件路径
+import { statistics, resetStatistics, resetWordRecords } from "@/common/statistics"; // 替换为你的文件路径
 
 // 格式化时间（毫秒转秒）
 const formatTime = (ms) =>

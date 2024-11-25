@@ -345,7 +345,7 @@ function handleKeyDown(event) {
 
         if (cost > statistics.value.maximumWordInputCost) {
           statistics.value.maximumWordInputCost = cost;
-          statistics.value.minimumWordInputCostWord = props.targetWord;
+          statistics.value.maximumWordInputCostWord = props.targetWord;
         }
 
         if (cost < statistics.value.minimumWordInputCost) {

@@ -35,7 +35,7 @@
       <!-- 上方文字打字效果 -->
       <WordTyper :targetWord="targetWord?.headWord" @success="typeSuccess"></WordTyper>
       <div class="flex items-center justify-center space-x-4 p-8">
-        <UButton link size="xs" color="orange" @click="skipWord"> 跳过该单词 </UButton>
+        <UButton link size="xs" color="orange" @click="skipWord"> 不看该单词 </UButton>
       </div>
       <WordCard :targetWord="targetWord" ref="wordCardRef"></WordCard>
     </div>
@@ -212,6 +212,11 @@ function handleKeydown(event) {
     event.preventDefault(); // 阻止默认 Tab 行为（如焦点切换）
     moveToNextWord();
   }
+
+  if (event.key === ",") {
+    event.preventDefault(); // 播放读音
+    wordCardRef.value.playSound();
+  }
 }
 
 window.addEventListener("keydown", handleKeydown);
@@ -232,6 +237,8 @@ function initWord() {
   if (typingConfig.value.playSoundAtBeginning) {
     wordCardRef.value.playSound();
   }
+
+  console.log(targetWord.value);
 }
 
 watch(targetWord, async () => {
@@ -243,6 +250,8 @@ const showModal = ref(false);
 
 async function handleStartClick() {
   await init();
+
+  // 先默认选择第一个单词
   targetWord.value = list.value[0];
   targetWordLibIndex.value = 0;
   showModal.value = false; // 关闭弹窗
