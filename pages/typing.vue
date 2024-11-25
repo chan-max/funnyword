@@ -45,7 +45,11 @@
     <div v-if="showModal" class="modal-overlay">
       <div class="modal-content">
         <p class="modal-text">欢迎来到 funny word 词库</p>
-        <button @click="handleButtonClick" class="modal-button">开始吧</button>
+        <div class="p-4 text-white flex items-center space-x-2">
+          <UCheckbox v-model="isRandom" label="" />
+          <div>是否随机获取单词</div>
+        </div>
+        <button @click="handleStartClick" class="modal-button">开始</button>
       </div>
     </div>
   </div>
@@ -59,6 +63,7 @@ import { ref, nextTick } from "vue";
 import { getLocalWords } from "~/common/api/word";
 import { typingConfig } from "~/common/config";
 import { WordRecords, createWordRecord, statistics } from "~/common/statistics";
+import { useLocalStorage } from "@vueuse/core";
 
 const route = useRoute();
 
@@ -70,11 +75,14 @@ const listItems = ref([]); // 列表项引用
 
 const wordCardRef = ref();
 
+const isRandom = useLocalStorage("funnyword_random", false);
+
 // 使用分页钩子
 const { list, getList, loading, getPreList, total } = usePagination(getLocalWords, {
   preprocessParams: (params) => {
     params.lib = route.query.lib;
     params.pageSize = 200;
+    params.random = isRandom.value;
     return params;
   },
   defaultCurrentPage: 1,
@@ -160,9 +168,6 @@ function scrollToActive() {
 // 初始化数据
 async function init() {
   await getList();
-
-  showModal.value = true;
-
   // 向下滚动是为了当在中间页初始化时，能强制请求上一页的数据
   setTimeout(() => {
     const container = listContainer.value;
@@ -171,6 +176,10 @@ async function init() {
     }
   }, 33);
 }
+
+onMounted(() => {
+  showModal.value = true;
+});
 
 // 输入完成时，自动跳转到下一个单词
 async function typeSuccess() {
@@ -207,8 +216,6 @@ function handleKeydown(event) {
 
 window.addEventListener("keydown", handleKeydown);
 
-init();
-
 // 处理单词状态
 function initWord() {
   let record = statistics.value.wordRecords[targetWord.value.headWord];
@@ -234,7 +241,8 @@ watch(targetWord, async () => {
 
 const showModal = ref(false);
 
-function handleButtonClick() {
+async function handleStartClick() {
+  await init();
   targetWord.value = list.value[0];
   targetWordLibIndex.value = 0;
   showModal.value = false; // 关闭弹窗
