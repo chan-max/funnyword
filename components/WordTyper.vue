@@ -163,7 +163,7 @@
       </span>
     </div>
 
-    <div style="height: 64px">
+    <div style="height: 32px">
       <div v-if="message" :class="messageClass" class="text-xl font-semibold">
         {{ message }}
       </div>

@@ -60,16 +60,3 @@ export async function getLocalWords({ lib, currentPage = 1, pageSize = 10 }) {
 
 
 
-export function formatWord(raw){
-
-    const content = raw.content.word.content
-
-    return {
-        word:raw.headWord,
-        rank:raw.wordRank,
-        phrases:raw.phase.phrases,
-        
-
-    }
-}
-

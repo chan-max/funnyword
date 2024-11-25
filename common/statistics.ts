@@ -1,8 +1,11 @@
 import { useLocalStorage } from "@vueuse/core";
 
 
-enum WordRecords {
-    SKIP = 0 // 跳过该单词
+export enum WordRecords {
+
+    NORMAL = 0, // 正常状态
+
+    SKIP = 1 // 跳过该单词
 }
 
 
@@ -32,11 +35,17 @@ const statisticsTemplate = {
 
     wordRecords: {
         "abcdefg": {
-            status
+            status: WordRecords.NORMAL
         }
     }
 }
 
+
+export function createWordRecord() {
+    return {
+        status: WordRecords.NORMAL
+    }
+}
 
 
 export const statistics = useLocalStorage('funnyword_statistics', {

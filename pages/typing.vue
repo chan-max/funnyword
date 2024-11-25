@@ -34,6 +34,9 @@
     <div style="flex: 1">
       <!-- 上方文字打字效果 -->
       <WordTyper :targetWord="targetWord?.headWord" @success="typeSuccess"></WordTyper>
+      <div class="flex items-center justify-center space-x-4 p-8">
+        <UButton link size="xs" color="orange" @click="skipWord"> 跳过该单词 </UButton>
+      </div>
       <WordCard :targetWord="targetWord" ref="wordCardRef"></WordCard>
     </div>
 
@@ -55,6 +58,7 @@ import { usePagination } from "@/common/paging";
 import { ref, nextTick } from "vue";
 import { getLocalWords } from "~/common/api/word";
 import { typingConfig } from "~/common/config";
+import { WordRecords, createWordRecord, statistics } from "~/common/statistics";
 
 const route = useRoute();
 
@@ -184,18 +188,20 @@ async function typeSuccess() {
 }
 
 function moveToNextWord() {
-  if (targetWordLibIndex.value < list.value.length - 1) {
-    targetWordLibIndex.value++;
-    targetWord.value = list.value[targetWordLibIndex.value];
-    scrollToActive();
-    window.scrollTo(0, 0);
+  if (targetWordLibIndex.value >= list.value.length - 1) {
+    return;
   }
+
+  targetWordLibIndex.value++;
+  targetWord.value = list.value[targetWordLibIndex.value];
+  scrollToActive();
+  window.scrollTo(0, 0);
 }
 
 function handleKeydown(event) {
   if (event.key === "Tab") {
     event.preventDefault(); // 阻止默认 Tab 行为（如焦点切换）
-    moveToNextWord()
+    moveToNextWord();
   }
 }
 
@@ -203,11 +209,27 @@ window.addEventListener("keydown", handleKeydown);
 
 init();
 
-watch(targetWord, async () => {
-  await nextTick();
+// 处理单词状态
+function initWord() {
+  let record = statistics.value.wordRecords[targetWord.value.headWord];
+
+  if (!record) {
+    record = statistics.value.wordRecords[targetWord.value.headWord] = createWordRecord();
+  }
+
+  if (record.status == WordRecords.SKIP) {
+    moveToNextWord();
+    return;
+  }
+
   if (typingConfig.value.playSoundAtBeginning) {
     wordCardRef.value.playSound();
   }
+}
+
+watch(targetWord, async () => {
+  await nextTick();
+  initWord();
 });
 
 const showModal = ref(false);
@@ -216,6 +238,20 @@ function handleButtonClick() {
   targetWord.value = list.value[0];
   targetWordLibIndex.value = 0;
   showModal.value = false; // 关闭弹窗
+}
+
+// 跳过该单词
+function skipWord() {
+  let record = statistics.value.wordRecords[targetWord.value.headWord];
+
+  if (!record) {
+    record = statistics.value.wordRecords[targetWord.value.headWord] = createWordRecord();
+  }
+
+  // 设置为跳过状态
+  record.status = WordRecords.SKIP;
+
+  moveToNextWord();
 }
 </script>
 
