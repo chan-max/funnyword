@@ -157,7 +157,7 @@ function scrollToActive() {
 async function init() {
   await getList();
 
-  showModal.value = true
+  showModal.value = true;
 
   // 向下滚动是为了当在中间页初始化时，能强制请求上一页的数据
   setTimeout(() => {
@@ -179,14 +179,27 @@ async function typeSuccess() {
   }
 
   setTimeout(() => {
-    if (targetWordLibIndex.value < list.value.length - 1) {
-      targetWordLibIndex.value++;
-      targetWord.value = list.value[targetWordLibIndex.value];
-      scrollToActive();
-      window.scrollTo(0, 0);
-    }
+    moveToNextWord();
   }, 3333);
 }
+
+function moveToNextWord() {
+  if (targetWordLibIndex.value < list.value.length - 1) {
+    targetWordLibIndex.value++;
+    targetWord.value = list.value[targetWordLibIndex.value];
+    scrollToActive();
+    window.scrollTo(0, 0);
+  }
+}
+
+function handleKeydown(event) {
+  if (event.key === "Tab") {
+    event.preventDefault(); // 阻止默认 Tab 行为（如焦点切换）
+    moveToNextWord()
+  }
+}
+
+window.addEventListener("keydown", handleKeydown);
 
 init();
 
@@ -198,7 +211,6 @@ watch(targetWord, async () => {
 });
 
 const showModal = ref(false);
-
 
 function handleButtonClick() {
   targetWord.value = list.value[0];

@@ -25,7 +25,6 @@
               <UCheckbox v-model="typingConfig.playSoundAtBeginning" label="" />
             </div>
 
-
             <div class="flex items-center justify-between">
               <label
                 class="text-right pr-4 text-sm font-medium text-gray-600 text-nowrap"
@@ -43,8 +42,6 @@
               </label>
               <UCheckbox v-model="typingConfig.autoSwitchToNextAfterSuccess" label="" />
             </div>
-      
-        
 
             <div class="flex items-center justify-between">
               <label
@@ -112,7 +109,7 @@
               </label>
               <UDropdown :items="[errorOptions]" :popper="{ placement: 'bottom-start' }">
                 <UButton
-                size="2xs"
+                  size="2xs"
                   color="white"
                   :label="getLabelFromOptions(errorOptions, errorSound)"
                   trailing-icon="i-heroicons-chevron-down-20-solid"
@@ -178,7 +175,7 @@
 import { useLocalStorage } from "@vueuse/core";
 import { ref, watch, onMounted, onUnmounted } from "vue";
 import { typingConfig } from "~/common/config";
-
+import { statistics } from "~/common/statistics";
 
 const props = defineProps({
   targetWord: {
@@ -196,6 +193,9 @@ const isComplete = ref(false); // 是否已完成输入
 const isTypingFocused = ref(true); // 页面是否处于激活状态
 
 window.isTypingFocused = isTypingFocused;
+
+// 首次输入时间
+const firstInputTime = ref(0);
 
 const isBouncing = ref(false); // 跳动动画的控制
 
@@ -317,12 +317,46 @@ function handleKeyDown(event) {
     return;
   }
 
+  // 正式输入逻辑
   if (/^[a-zA-Z0-9 ]$/.test(event.key)) {
+    if (!firstInputTime.value) {
+      firstInputTime.value = new Date().getTime();
+    }
+
+    // 输入了字符
+    statistics.value.letterInputCount++;
+
     if (event.key === props.targetWord[currentIndex.value]) {
+      // 正确输入了字符
+      statistics.value.letterInputSuccessCount++;
+
       playSound(keyboardSound.value);
       currentIndex.value++;
+
+      // 单词输入成功
       if (currentIndex.value === props.targetWord.length) {
-        message.value = "🎉 太棒了！你正确输入了单词！";
+        statistics.value.wordInputSuccessCount++;
+
+        let current = new Date().getTime();
+
+        // 耗时
+        let cost = current - firstInputTime.value;
+        firstInputTime.value = null;
+
+        if (cost > statistics.value.maximumWordInputCost) {
+          statistics.value.maximumWordInputCost = cost;
+          statistics.value.minimumWordInputCostWord = props.targetWord;
+        }
+
+        if (cost < statistics.value.minimumWordInputCost) {
+          statistics.value.minimumWordInputCost = cost;
+          statistics.value.minimumWordInputCostWord = props.targetWord;
+        }
+
+        statistics.value.latestWordInputCost = cost;
+        statistics.value.latestWordInputCostWord = props.targetWord;
+
+        message.value = `🎉 太棒了！你正确输入了单词 ！耗时${cost / 1000} 秒`;
         messageClass.value = "text-green-400";
         playSound(successSound.value);
         isComplete.value = true;
@@ -332,6 +366,7 @@ function handleKeyDown(event) {
         emits("success");
       }
     } else {
+      statistics.value.letterInputErrorCount++;
       message.value = "❌ 输入错误，请重试！";
       messageClass.value = "text-red-400";
       isShaking.value = true;

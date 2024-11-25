@@ -2,17 +2,17 @@
   <div class="min-h-screen bg-black bg-opacity-90 py-8">
     <div class="container mx-auto px-4">
       <!-- Header Title -->
-      <h1 class="text-3xl font-bold text-white mb-6 text-center">词库</h1>
+      <h1 class="text-3xl font-bold text-white mb-6 text-center">词库 共:{{ books.length }} </h1>
 
       <!-- Word Books Grid -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+      <div class="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
         <div
           v-for="(item, index) in books"
           :key="item.id"
           class="relative group overflow-hidden rounded-md"
         >
           <!-- Cover Image with Inner Shadow -->
-          <div class="relative overflow-hidden rounded-md">
+          <div class="relative overflow-hidden rounded-md" style="min-height: 140px;">
             <!-- Inner Shadow -->
             <div class="absolute inset-0 z-10 pointer-events-none inner-shadow"></div>
 

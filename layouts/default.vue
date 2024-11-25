@@ -19,7 +19,7 @@
           <!-- Navigation -->
           <div class="flex items-center space-x-4">
             <!-- Tabs for PC -->
-            <nav class="flex space-x-6">
+            <nav class="flex space-x-2 mx-8">
               <button
                 v-for="(tab, index) in tabs"
                 :key="index"
@@ -34,20 +34,6 @@
               </button>
             </nav>
 
-            <!-- <UDropdown :items="[langOptions]" :popper="{ placement: 'bottom-end' }">
-              <div class="flex items-center mx-2">
-                {{ locale }}
-                <CaretDownOutlined style="margin-top: 4px" />
-              </div>
-
-              <template #item="{ item }">
-                <span @click="langClick(item)" class="w-full text-left">
-                  {{ item.label }}</span
-                >
-              </template>
-            </UDropdown> -->
-
-            <!-- User Avatar or Login -->
             <div>
               <template v-if="loginStore.isLogin">
                 <UDropdown :items="items" :popper="{ placement: 'bottom-end' }">
@@ -215,7 +201,12 @@ const items = [
 ];
 
 // Tabs Configuration
-const tabs = [{ label: "词库", path: "/lib" }];
+const tabs = [
+  { label: "词库", path: "/lib" },
+  { label: "音标", path: "/phonetic" },
+  { label: "记录", path: "/statistics" },
+  { label: "成就", path: "/achievement" },
+];
 
 // State management
 const showTabsMenu = ref(false); // Mobile tabs dropdown state
